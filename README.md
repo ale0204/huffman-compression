@@ -419,8 +419,8 @@ Storage efficiency         99.98%            Only 1 padding bit
 - [ ] Progress bars for large files
 - [ ] Compression algorithm selection
 - [ ] Archive encryption support
-- [ ] Cross-platform directory handling
-- [ ] GUI interface
+- [x] Cross-platform directory handling
+- [x] GUI interface
 - [ ] Parallel processing for multiple files
 
 ---
