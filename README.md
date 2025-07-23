@@ -1,6 +1,20 @@
-# Huffman Compression Utility
+# Huffman Compression Tool with Interactive Web Interface
 
-A complete implementation of the Huffman compression algorithm in C++, providing efficient lossless compression for text and binary files using advanced binary bit packing techniques.
+🗜️ Complete Huffman compression implementation with modern web UI for educational and practical use. Features drag-and-drop file compression, interactive frequency table analysis, and real-time compression statistics visualization.
+
+**🎯 Tech Stack:**
+- **Backend**: C++ (Huffman algorithm, binary bit packing)
+- **Frontend**: Node.js, Express.js, HTML5, CSS3, Vanilla JavaScript
+- **UI/UX**: Responsive design, drag-and-drop interface, sortable tables
+- **Deployment**: Cross-platform automation scripts
+
+**✨ Key Features:**
+- Interactive web interface with drag-and-drop file upload
+- Sortable frequency table with character analysis
+- Real-time compression statistics (Shannon entropy, efficiency metrics)
+- Educational visualization of information theory concepts
+- One-command deployment on any platform
+- Optimal binary bit packing achieving 40-45% compression ratios
 
 **Course:** Calculatoare Numerice (Numerical Computing)  
 **Academic Year:** 2024-2025, Semester 2
@@ -19,12 +33,21 @@ A complete implementation of the Huffman compression algorithm in C++, providing
 
 ## Overview
 
-This project implements a full-featured Huffman compression utility that can:
+This project implements a full-featured Huffman compression utility with both command-line and web interfaces:
+
+**Core Capabilities:**
 - Compress single or multiple files into a single archive
 - Decompress archives back to original files with 100% integrity
 - Display detailed compression statistics
 - Achieve compression ratios of 40-45% with 99%+ efficiency compared to theoretical limits
 - Use optimized binary bit packing to store compressed data in minimal space
+
+**Web Interface Features:**
+- 🎨 Modern drag-and-drop file upload interface
+- 📊 Interactive frequency table with sortable columns
+- 📈 Real-time compression statistics and efficiency visualization
+- 🎓 Educational tools for understanding information theory concepts
+- 🚀 One-command deployment with automated scripts
 
 The implementation follows modern C++ practices and includes comprehensive error handling, verbose output options, safe file operations, and highly optimized binary storage that achieves real compression through efficient bit packing algorithms.
 
@@ -58,11 +81,12 @@ The implementation follows modern C++ practices and includes comprehensive error
 ```
 huffman-compression/
 ├── README.md                   # This documentation file
+├── DEPLOYMENT.md               # Deployment guide and instructions
+├── deploy.bat                  # Windows deployment script
+├── deploy.sh                   # Unix/Linux deployment script
 ├── main.cpp                    # Entry point and command-line interface
 ├── build.bat                   # Windows build script
-├── build.ps1                   # PowerShell build script
 ├── Makefile                    # Unix/Linux build configuration
-├── Makefile.win               # Windows-specific Makefile
 ├── include/                    # Header files
 │   ├── HuffmanAlgorithm.h     # Core compression algorithms
 │   ├── HuffmanNode.h          # Tree node structure
@@ -70,12 +94,20 @@ huffman-compression/
 │   ├── ArchiveStructures.h    # Archive format definitions
 │   ├── HuffmanException.h     # Custom exception classes
 │   └── OperationMode.h        # Enumeration for modes
-└── src/                       # Implementation files
-    ├── HuffmanAlgorithm.cpp   # Core algorithms implementation
-    ├── HuffmanNode.cpp        # Tree node operations
-    ├── CommandLineOptions.cpp # Command-line parsing
-    ├── ArchiveStructures.cpp  # Archive format handling
-    └── HuffmanException.cpp   # Exception implementations
+├── src/                       # Implementation files
+│   ├── HuffmanAlgorithm.cpp   # Core algorithms implementation
+│   ├── HuffmanNode.cpp        # Tree node operations
+│   ├── CommandLineOptions.cpp # Command-line parsing
+│   ├── ArchiveStructures.cpp  # Archive format handling
+│   └── HuffmanException.cpp   # Exception implementations
+└── web-ui/                    # Web interface
+    ├── README.md              # Web UI documentation
+    ├── package.json           # Node.js dependencies
+    ├── server.js             # Express server
+    └── public/               # Static web assets
+        ├── index.html        # Main HTML interface
+        ├── style.css         # Responsive CSS styling
+        └── script.js         # Interactive JavaScript
 ```
 
 ## Building the Project
@@ -420,7 +452,8 @@ Storage efficiency         99.98%            Only 1 padding bit
 - [ ] Compression algorithm selection
 - [ ] Archive encryption support
 - [x] Cross-platform directory handling
-- [x] GUI interface
+- [x] Interactive web interface with drag-and-drop
+- [x] Sortable frequency tables and statistics visualization
 - [ ] Parallel processing for multiple files
 
 ---
