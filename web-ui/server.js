@@ -47,7 +47,7 @@ const upload = multer({
 
 // Helper function to execute Huffman compression utility
 function executeHuffman(args, callback) {
-    const huffmanExe = path.join(__dirname, '..', 'huff.exe');
+    const huffmanExe = path.join(__dirname, '..', 'huff');
     
     try {
         const result = execSync(`"${huffmanExe}" ${args}`, {
