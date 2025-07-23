@@ -6,13 +6,14 @@ const { execSync, spawn } = require('child_process');
 const cors = require('cors');
 
 const app = express();
-const PORT = 50204;
+const PORT = process.env.PORT || 50204;
+const HOST = '0.0.0.0'; // Bind to all interfaces for Docker
 
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.static('public'));
-app.use('/downloads', express.static('downloads'));
+app.use(express.static(path.join(__dirname, 'public')));
+app.use('/downloads', express.static(path.join(__dirname, 'downloads')));
 
 // Create directories
 const uploadsDir = path.join(__dirname, 'uploads');
@@ -68,9 +69,13 @@ function parseVerboseOutput(output) {
     let inFrequencyTable = false;
     const frequencyTable = [];
     
+    console.log('=== FULL HUFFMAN OUTPUT START ===');
+    console.log(output);
+    console.log('=== FULL HUFFMAN OUTPUT END ===');
+    
     for (const line of lines) {
         const trimmedLine = line.trim();
-        console.log('Parsing line:', trimmedLine); // Debug logging
+        console.log('Parsing line:', JSON.stringify(trimmedLine)); // Debug logging with JSON to see whitespace
         
         if (trimmedLine.includes('Original size:') || trimmedLine.includes('Original total size:')) {
             const match = trimmedLine.match(/(\d+)\s*bytes/);
@@ -96,20 +101,44 @@ function parseVerboseOutput(output) {
         } else if (trimmedLine.includes('Frequency table entries:')) {
             const match = trimmedLine.match(/(\d+)/);
             stats.frequencyEntries = match ? match[1] : null;
-        } else if (trimmedLine.includes('=== CHARACTER FREQUENCY TABLE ===')) {
+        } else if (trimmedLine.includes('=== CHARACTER FREQUENCY TABLE ===') || 
+                   trimmedLine.includes('CHARACTER FREQUENCY TABLE') ||
+                   trimmedLine.includes('FREQUENCY TABLE')) {
+            console.log('🔍 Found frequency table start marker:', JSON.stringify(trimmedLine));
             inFrequencyTable = true;
-        } else if (trimmedLine.includes('Nr\tChar\tFreq\tCode\t\t#bits') || 
-                   trimmedLine.includes('--------------------------------------------')) {
-            // Skip table headers
+        } else if (trimmedLine.includes('Nr') && trimmedLine.includes('Char') && trimmedLine.includes('Freq') && trimmedLine.includes('Code')) {
+            console.log('🔍 Found frequency table header:', JSON.stringify(trimmedLine));
+            // Skip table headers but stay in frequency table mode
+            continue;
+        } else if (trimmedLine.includes('----') || trimmedLine.includes('====')) {
+            console.log('🔍 Found separator line:', JSON.stringify(trimmedLine));
+            // Skip separator lines
             continue;
         } else if (inFrequencyTable && trimmedLine.length > 0) {
+            console.log('🔍 Processing frequency table line:', JSON.stringify(trimmedLine));
             // Parse frequency table row - be more robust with whitespace
             const parts = trimmedLine.split(/\s+/); // Split on any whitespace
-            if (parts.length >= 5) {
+            console.log('🔍 Split parts:', parts, 'Length:', parts.length);
+            
+            if (parts.length >= 4) { // Relaxed from 5 to 4 minimum parts
                 const index = parts[0];
                 const char = parts[1];
                 const freq = parts[2];
                 const code = parts[3];
+                
+                // Parse and validate frequency - ensure it's a valid number
+                const parsedFreq = parseInt(freq);
+                const parsedIndex = parseInt(index);
+                
+                console.log('🔍 Attempting to parse:', {
+                    index: index,
+                    parsedIndex: parsedIndex,
+                    char: char,
+                    freq: freq,
+                    parsedFreq: parsedFreq,
+                    code: code
+                });
+                
                 // The bits value might be in parts[4] or later due to code formatting
                 let bits = null;
                 for (let i = 4; i < parts.length; i++) {
@@ -124,22 +153,45 @@ function parseVerboseOutput(output) {
                     bits = code.length;
                 }
                 
-                frequencyTable.push({
-                    index: parseInt(index),
-                    character: char,
-                    frequency: parseInt(freq),
-                    code: code,
-                    bits: bits || (code ? code.length : 0)
-                });
-            } else if (trimmedLine === '') {
+                // Only add valid entries to the frequency table
+                if (!isNaN(parsedIndex) && !isNaN(parsedFreq) && code && code !== 'Code') {
+                    const entry = {
+                        index: parsedIndex,
+                        character: char,
+                        frequency: parsedFreq,
+                        code: code,
+                        bits: bits || (code ? code.length : 0)
+                    };
+                    console.log('✅ Adding entry to frequency table:', entry);
+                    frequencyTable.push(entry);
+                } else {
+                    console.log('❌ Skipping invalid entry:', {
+                        parsedIndex: parsedIndex,
+                        parsedFreq: parsedFreq,
+                        code: code,
+                        isValidIndex: !isNaN(parsedIndex),
+                        isValidFreq: !isNaN(parsedFreq),
+                        hasCode: !!code,
+                        isNotHeader: code !== 'Code'
+                    });
+                }
+            } else if (trimmedLine === '' || parts.length === 0) {
+                console.log('🔍 Empty line - ending frequency table');
                 // End of frequency table
                 inFrequencyTable = false;
+            } else {
+                console.log('🔍 Line has insufficient parts:', parts.length, '- skipping');
             }
         }
     }
     
     stats.frequencyTable = frequencyTable;
-    console.log('Parsed stats:', stats); // Debug logging
+    console.log('📊 Final parsed stats:', stats);
+    console.log('📊 Frequency table entries found:', frequencyTable.length);
+    if (frequencyTable.length > 0) {
+        console.log('📊 First entry:', frequencyTable[0]);
+        console.log('📊 Last entry:', frequencyTable[frequencyTable.length - 1]);
+    }
     return stats;
 }
 
@@ -335,11 +387,23 @@ app.use((error, req, res, next) => {
     });
 });
 
-app.listen(PORT, () => {
-    console.log(`🚀 Huffman Compression Web UI running on http://localhost:${PORT}`);
+// Docker-optimized server startup
+app.listen(PORT, HOST, () => {
+    console.log(`🚀 Huffman Compression Web UI running on http://${HOST}:${PORT}`);
     console.log(`📁 Uploads: ${uploadsDir}`);
     console.log(`📦 Downloads: ${downloadsDir}`);
     console.log(`📂 Decompressed: ${decompressedDir}`);
+    console.log(`🔧 Huffman executable: ${path.join(__dirname, '..', 'huff')}`);
+    console.log(`🐳 Docker container ready for external connections!`);
+    
+    // Health check endpoint for Docker
+    app.get('/health', (req, res) => {
+        res.status(200).json({ 
+            status: 'healthy',
+            timestamp: new Date().toISOString(),
+            uptime: process.uptime()
+        });
+    });
 });
 
 module.exports = app;
