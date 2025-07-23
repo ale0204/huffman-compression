@@ -361,6 +361,17 @@ bool HuffmanAlgorithm::encodeFiles(const CommandLineOptions& options)
         // Convert bit string to actual binary data and write it
         std::vector<unsigned char> binaryData = stringToBinaryData(compressed);
         
+        // Update stats with actual compressed size
+        stats.totalCompressedSize = binaryData.size();
+        
+        // Write compression statistics
+        outFile.write(reinterpret_cast<const char*>(&stats.shannonInfo), sizeof(double));
+        outFile.write(reinterpret_cast<const char*>(&stats.huffmanAverage), sizeof(double));
+        outFile.write(reinterpret_cast<const char*>(&stats.compressionRatio), sizeof(double));
+        outFile.write(reinterpret_cast<const char*>(&stats.efficiency), sizeof(double));
+        outFile.write(reinterpret_cast<const char*>(&stats.totalOriginalSize), sizeof(size_t));
+        outFile.write(reinterpret_cast<const char*>(&stats.totalCompressedSize), sizeof(size_t));
+        
         // Write the number of valid bits in the last byte (for proper decompression)
         size_t totalBits = compressed.length();
         unsigned char paddingBits = (8 - (totalBits % 8)) % 8;  // Number of padding bits in last byte
@@ -447,6 +458,16 @@ bool HuffmanAlgorithm::decodeArchive(const CommandLineOptions& options)
             frequencies[ch] = freq;
         }
         
+        // Read stored compression statistics
+        CompressionStatistics storedStats;
+        file.read(reinterpret_cast<char*>(&storedStats.shannonInfo), sizeof(double));
+        file.read(reinterpret_cast<char*>(&storedStats.huffmanAverage), sizeof(double));
+        file.read(reinterpret_cast<char*>(&storedStats.compressionRatio), sizeof(double));
+        file.read(reinterpret_cast<char*>(&storedStats.efficiency), sizeof(double));
+        file.read(reinterpret_cast<char*>(&storedStats.totalOriginalSize), sizeof(size_t));
+        file.read(reinterpret_cast<char*>(&storedStats.totalCompressedSize), sizeof(size_t));
+        storedStats.frequencies = frequencies;
+        
         // Read padding bits information
         unsigned char paddingBits;
         file.read(reinterpret_cast<char*>(&paddingBits), sizeof(paddingBits));
@@ -477,6 +498,23 @@ bool HuffmanAlgorithm::decodeArchive(const CommandLineOptions& options)
             std::cout << "Number of files: " << numFiles << "\n";
             std::cout << "Frequency table entries: " << freqTableSize << "\n";
             std::cout << "Compressed data: " << binaryData.size() << " bytes (" << totalBits << " bits)\n";
+            
+            // Generate Huffman codes for complete statistics display
+            HuffmanNode* tempTree = buildHuffmanTree(frequencies);
+            if (tempTree) {
+                generateCodes(tempTree, "", storedStats.huffmanCodes);
+                
+                // Calculate code lengths
+                for (const auto& pair : storedStats.huffmanCodes) {
+                    storedStats.codeLengths[pair.first] = pair.second.length();
+                }
+                
+                // Print the stored statistics
+                storedStats.printVerboseStatistics();
+                
+                // Clean up temporary tree
+                delete tempTree;
+            }
         }
         
         // Reconstruct Huffman tree
@@ -555,7 +593,7 @@ bool HuffmanAlgorithm::decodeArchive(const CommandLineOptions& options)
         if (options.isVerbose())
         {
             std::cout << "Decoding completed successfully!\n";
-            std::cout << "✓ Size verification: " << allDecompressed.length() << " bytes\n";
+            std::cout << "Size verification: " << allDecompressed.length() << " bytes\n";
         }
         
         // Clean up

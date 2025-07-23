@@ -47,6 +47,26 @@ void CompressionStatistics::printVerboseStatistics() const
         {
             std::cout << "\\n";
         }
+        else if (ch == '\r')
+        {
+            std::cout << "\\r";
+        }
+        else if (ch == '\0')
+        {
+            std::cout << "\\0";
+        }
+        else if (ch < 32 || ch > 126) // Non-printable ASCII
+        {
+            std::cout << "[" << (int)(unsigned char)ch << "]";
+        }
+        else if (ch == '\t')
+        {
+            std::cout << "\\t";
+        }
+        else if (ch == '\'')
+        {
+            std::cout << "\\'";
+        }
         else if (ch == '\t')
         {
             std::cout << "\\t";

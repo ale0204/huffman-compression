@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Huffman Compression Tool</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1 class="title">
+                <i class="fas fa-compress-alt"></i>
+                Huffman Compression Tool
+            </h1>
+            <p class="subtitle">
+                Advanced lossless compression using binary bit packing technology
+            </p>
+            <div class="course-info">
+                <i class="fas fa-graduation-cap"></i>
+                Calculatoare Numerice - Semester 2, 2024-2025
+            </div>
+        </header>
+
+        <main class="main-content">
+            <!-- File Upload Section -->
+            <section class="upload-section">
+                <div class="upload-box" id="uploadBox">
+                    <div class="upload-content">
+                        <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                        <h3>Select file to compress or decompress</h3>
+                        <p class="upload-description">
+                            Drag and drop your file here, or click to browse
+                            <br>
+                            <small>Maximum file size: 1GB</small>
+                        </p>
+                        <label for="fileInput" class="select-btn" style="cursor: pointer; display: inline-block; margin: 0;">
+                            <i class="fas fa-folder-open"></i>
+                            Select File
+                        </label>
+                    </div>
+                </div>
+                
+                <input type="file" id="fileInput" class="file-input" accept="*/*" style="display: none;">
+                
+                <div class="file-info" id="fileInfo" style="display: none;">
+                    <div class="file-details">
+                        <i class="fas fa-file-alt"></i>
+                        <div class="file-meta">
+                            <span class="file-name" id="fileName"></span>
+                            <span class="file-size" id="fileSize"></span>
+                        </div>
+                        <button class="remove-btn" onclick="clearFile()">
+                            ×
+                        </button>
+                    </div>
+                    <button class="process-btn" id="processBtn" onclick="processFile()">
+                        <i class="fas fa-compress"></i>
+                        <span id="processBtnText">Compress</span>
+                    </button>
+                </div>
+            </section>
+
+            <!-- Progress Section -->
+            <section class="progress-section" id="progressSection" style="display: none;">
+                <div class="progress-card">
+                    <div class="progress-header">
+                        <i class="fas fa-cog fa-spin"></i>
+                        <span id="progressText">Processing...</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Results Section -->
+            <section class="results-section" id="resultsSection" style="display: none;">
+                <!-- Compression Results -->
+                <div class="result-card" id="compressionResult" style="display: none;">
+                    <div class="result-header">
+                        <i class="fas fa-check-circle success-icon"></i>
+                        <h3>Compression Complete!</h3>
+                    </div>
+                    
+                    <div class="download-section">
+                        <button class="download-btn" id="downloadCompressed">
+                            <i class="fas fa-download"></i>
+                            Download Compressed File
+                        </button>
+                    </div>
+                    
+                    <div class="stats-section" id="compressionStats">
+                        <!-- Stats will be populated by JavaScript -->
+                    </div>
+                    
+                    <div class="frequency-table-section" id="compressionFrequencyTable" style="display: none;">
+                        <h4 class="frequency-table-title">
+                            <i class="fas fa-table"></i>
+                            Character Frequency Table
+                            <small style="font-weight: normal; font-size: 0.8em; color: #7f8c8d; display: block; margin-top: 5px;">
+                                Click column headers to sort ↕️
+                            </small>
+                        </h4>
+                        <div class="frequency-table-container">
+                            <table class="frequency-table">
+                                <thead>
+                                    <tr>
+                                        <th class="sortable" data-column="index">Nr</th>
+                                        <th class="sortable" data-column="character">Character</th>
+                                        <th class="sortable" data-column="frequency">Frequency</th>
+                                        <th class="sortable" data-column="code">Huffman Code</th>
+                                        <th class="sortable" data-column="bits">Bits</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="compressionFrequencyTableBody">
+                                    <!-- Table rows will be populated by JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Archive Results -->
+                <div class="result-card" id="archiveResult" style="display: none;">
+                    <div class="result-header">
+                        <i class="fas fa-archive success-icon"></i>
+                        <h3>Archive Contents</h3>
+                    </div>
+                    
+                    <div class="archive-controls">
+                        <button class="download-all-btn" id="downloadAllBtn">
+                            <i class="fas fa-download"></i>
+                            Download All Files
+                        </button>
+                    </div>
+                    
+                    <div class="file-list" id="fileList">
+                        <!-- File list will be populated by JavaScript -->
+                    </div>
+                    
+                    <div class="stats-section" id="archiveStats">
+                        <!-- Stats will be populated by JavaScript -->
+                    </div>
+                    
+                    <div class="frequency-table-section" id="archiveFrequencyTable" style="display: none;">
+                        <h4 class="frequency-table-title">
+                            <i class="fas fa-table"></i>
+                            Character Frequency Table
+                            <small style="font-weight: normal; font-size: 0.8em; color: #7f8c8d; display: block; margin-top: 5px;">
+                                Click column headers to sort ↕️
+                            </small>
+                        </h4>
+                        <div class="frequency-table-container">
+                            <table class="frequency-table">
+                                <thead>
+                                    <tr>
+                                        <th class="sortable" data-column="index">Nr</th>
+                                        <th class="sortable" data-column="character">Character</th>
+                                        <th class="sortable" data-column="frequency">Frequency</th>
+                                        <th class="sortable" data-column="code">Huffman Code</th>
+                                        <th class="sortable" data-column="bits">Bits</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="archiveFrequencyTableBody">
+                                    <!-- Table rows will be populated by JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Technical Details Section -->
+            <section class="details-section">
+                <h2>
+                    <i class="fas fa-info-circle"></i>
+                    How It Works
+                </h2>
+                <div class="details-grid">
+                    <div class="detail-card">
+                        <i class="fas fa-tree"></i>
+                        <h4>Huffman Tree</h4>
+                        <p>Builds optimal prefix-free codes based on character frequencies</p>
+                    </div>
+                    <div class="detail-card">
+                        <i class="fas fa-microchip"></i>
+                        <h4>Binary Bit Packing</h4>
+                        <p>Packs 8 bits into each byte using advanced bitwise operations</p>
+                    </div>
+                    <div class="detail-card">
+                        <i class="fas fa-chart-line"></i>
+                        <h4>99%+ Efficiency</h4>
+                        <p>Achieves near-theoretical optimal compression ratios</p>
+                    </div>
+                    <div class="detail-card">
+                        <i class="fas fa-shield-alt"></i>
+                        <h4>Lossless</h4>
+                        <p>Perfect reconstruction guaranteed with SHA256 verification</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="footer">
+            <p>
+                <i class="fas fa-university"></i>
+                Educational Project - Calculatoare Numerice Course
+            </p>
+            <p>
+                <i class="fas fa-code"></i>
+                Demonstrating information theory and data compression algorithms
+            </p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
