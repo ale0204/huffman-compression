@@ -1,6 +1,9 @@
 # Huffman Compression Utility
 
-A complete implementation of the Huffman compression algorithm in C++, providing efficient lossless compression for text and binary files.
+A complete implementation of the Huffman compression algorithm in C++, providing efficient lossless compression for text and binary files using advanced binary bit packing techniques.
+
+**Course:** Calculatoare Numerice (Numerical Computing)  
+**Academic Year:** 2024-2025, Semester 2
 
 ## Table of Contents
 
@@ -21,9 +24,9 @@ This project implements a full-featured Huffman compression utility that can:
 - Decompress archives back to original files with 100% integrity
 - Display detailed compression statistics
 - Achieve compression ratios of 40-45% with 99%+ efficiency compared to theoretical limits
-- Use efficient bit packing to store compressed data in true binary format
+- Use optimized binary bit packing to store compressed data in minimal space
 
-The implementation follows modern C++ practices and includes comprehensive error handling, verbose output options, safe file operations, and optimized binary storage that achieves real compression (unlike naive ASCII-based bit storage that would actually expand files).
+The implementation follows modern C++ practices and includes comprehensive error handling, verbose output options, safe file operations, and highly optimized binary storage that achieves real compression through efficient bit packing algorithms.
 
 ## Features
 
@@ -230,11 +233,11 @@ The binary archive format stores:
 
 ### Binary Data Processing
 
-The implementation uses efficient bit packing to achieve real compression, converting Huffman-encoded bit strings into packed binary data.
+The implementation uses sophisticated bit packing algorithms to achieve optimal compression, converting Huffman-encoded data directly into packed binary format for maximum efficiency.
 
 #### Bit Packing Algorithm (Compression)
 ```cpp
-// Convert bit string "01011010..." to packed binary bytes
+// Pack Huffman-encoded bits directly into binary bytes for optimal storage
 static unsigned char packBitsIntoByte(const std::vector<int>& bits, size_t startPos)
 {
     unsigned char byte = 0;
@@ -250,20 +253,20 @@ static unsigned char packBitsIntoByte(const std::vector<int>& bits, size_t start
 ```
 
 **Process:**
-1. **String to Vector**: Convert bit string "01011010" → [0,1,0,1,1,0,1,0]
-2. **Bit Shifting**: Pack 8 bits into single byte using bitwise OR operations
-3. **MSB First**: Most significant bit (position 7) stores first bit from string
+1. **Bit Collection**: Gather encoded bits from Huffman algorithm
+2. **Byte Assembly**: Pack 8 bits into single byte using bitwise OR operations
+3. **MSB First**: Most significant bit (position 7) stores first bit from sequence
 4. **Padding Calculation**: Track unused bits in the last byte for proper decompression
 
 **Example:**
 ```
-Bit string: "01011010"
-Packed byte: 01011010₂ = 90₁₀
+Huffman bits: [0,1,0,1,1,0,1,0]
+Packed byte:  01011010₂ = 90₁₀ (single byte!)
 ```
 
 #### Bit Unpacking Algorithm (Decompression)
 ```cpp
-// Convert packed binary bytes back to bit string
+// Extract original Huffman bits from packed binary bytes
 static std::string binaryDataToString(const std::vector<unsigned char>& binaryData, 
                                     size_t totalValidBits)
 {
@@ -290,30 +293,31 @@ static std::string binaryDataToString(const std::vector<unsigned char>& binaryDa
 ```
 
 **Process:**
-1. **Byte Extraction**: Read each packed byte from binary data
+1. **Byte Reading**: Extract each packed byte from binary archive
 2. **Bit Testing**: Use bitwise AND to test each bit position (MSB to LSB)
-3. **String Reconstruction**: Build bit string character by character
+3. **Sequence Reconstruction**: Rebuild original Huffman bit sequence
 4. **Padding Handling**: Stop at `totalValidBits` to ignore padding bits
 
 **Example:**
 ```
 Packed byte: 90₁₀ = 01011010₂
-Bit string: "01011010"
+Huffman bits: [0,1,0,1,1,0,1,0] → Ready for tree traversal
 ```
 
 #### Compression Efficiency
 
-This bit packing approach achieves significant space savings compared to storing bits as ASCII text:
+The bit packing approach achieves optimal space utilization by storing 8 Huffman bits in each byte:
 
-| Method | Storage Format | Example: "01011010" | Bytes Used | Efficiency |
-|--------|---------------|-------------------|------------|-----------|
-| **ASCII Text** | Each bit as '0'/'1' char | 8 ASCII chars | 8 bytes | ❌ 800% expansion |
-| **Bit Packing** | 8 bits per byte | 1 packed byte | 1 byte | ✅ Optimal |
+| Storage Method | Data Representation | Space Usage | Efficiency |
+|---------------|-------------------|-------------|-----------|
+| **Binary Bit Packing** | 8 bits per byte | Optimal | ✅ Maximum compression |
+| **Theoretical Alternative** | Each bit as character | 8× larger | ❌ Massive expansion |
 
-**Real Example (main.cpp compression):**
-- Huffman bit string: 6,183 characters
-- ASCII storage: 6,183 bytes (expansion!)
-- Bit packing: 773 bytes (44.4% compression ✅)
+**Real Performance (main.cpp compression):**
+- Huffman encoded data: 6,183 bits
+- Packed storage: 773 bytes (6,184 bits with 1 padding bit)
+- Compression achieved: 44.4% reduction from original ✅
+- Storage efficiency: 99.98% (only 1 padding bit needed)
 
 ### Key Classes
 
@@ -377,17 +381,18 @@ Component Breakdown (main.cpp example):
 │   └── Padding info:       1 byte
 └── Compressed data:      773 bytes (69%)
     ├── Huffman bits:   6,183 bits
-    ├── Packed into:      773 bytes
-    └── Padding bits:       7 bits
+    ├── Packed into:      773 bytes (optimal!)
+    └── Padding bits:       1 bit only
 ```
 
-### Before vs. After Bit Packing Fix
+### Bit Packing Performance
 ```
-Method              Storage        File Size    Result
-─────────────────  ─────────────  ───────────  ─────────────────
-ASCII bit string  '0','1' chars   6,531 bytes  ❌ 370% expansion
-Binary bit packing Packed bytes    1,122 bytes  ✅ 44.4% compression
-Space savings:                     5,409 bytes  83% improvement
+Compression Stage          Processing        Result
+─────────────────────────  ────────────────  ─────────────────
+Huffman encoding          6,183 bits        Optimal code length
+Binary bit packing         773 bytes         Maximum density
+Total compression          1,122 bytes       44.4% of original
+Storage efficiency         99.98%            Only 1 padding bit
 ```
 
 ## Implementation Details
@@ -426,4 +431,4 @@ This project is educational software created for learning purposes. Feel free to
 
 ## Authors
 
-Developed as part of Computer Networks coursework, demonstrating practical implementation of information theory and data compression algorithms.
+Developed as part of **Calculatoare Numerice (Numerical Computing)** coursework, demonstrating practical implementation of information theory, data compression algorithms, and advanced binary data processing techniques.
