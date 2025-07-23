@@ -1,0 +1,67 @@
+# Compiled executables
+*.exe
+*.out
+*.app
+
+# Object files
+*.o
+*.obj
+
+# Temporary files
+*.tmp
+*.temp
+
+# Test files
+test_*
+analyze_*
+my_huff.c
+main.huf
+main_fixed.huf
+*.huf
+
+# Build artifacts
+test.o
+
+# PowerShell scripts (excluding build.bat)
+*.ps1
+
+# Makefiles (keeping build.bat only)
+Makefile
+Makefile.win
+
+# Test and auxiliary programs
+run_tests.bat
+test_algorithm.*
+test_flags.*
+
+# Decompressed output directories
+test_decompressed.cpp/
+decompressed/
+
+# Visual Studio/VS Code files
+.vs/
+.vscode/
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+*.sln
+
+# IDE files
+*.cbp
+*.layout
+*.depend
+
+# Log files
+*.log
+logs.txt
+apel.txt
+
+# Windows thumbnail cache
+Thumbs.db
+ehthumbs.db
+
+# macOS
+.DS_Store
+
+# Linux
+*~
